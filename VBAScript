@@ -1,0 +1,145 @@
+Sub process_tickers()
+
+
+  Dim input_loop_counter As Long
+  Dim output_row_counter As Long
+  
+  Dim ticker As String
+  Dim opening_val As Double
+  Dim closing_val As Double
+  Dim volume_val As Double
+  Dim change_val As Double
+  Dim change_percent_val As Double
+  
+
+  Dim max_vol_ticker As String
+  Dim max_vol_value As Double
+  Dim max_pos_percent_ticker As String
+  Dim max_pos_percent_value As Double
+  Dim max_neg_percent_ticker As String
+  Dim max_neg_percent_value As Double
+
+
+  input_loop_counter = 2
+  output_row_counter = 2
+  
+  ticker = ""
+  opening_val = 0
+  closing_val = 0
+  volume_val = 0
+  change_val = 0
+  change_percent_val = 0
+  
+  
+  
+  
+  
+  Cells(1, 9) = "Ticker"
+  Cells(1, 10) = "Yearly Change"
+  Cells(1, 11) = "Percent Change"
+  Cells(1, 12) = "Total Stock Volume"
+  
+  
+  For input_loop_counter = 2 To Rows.Count
+                                             
+                                             
+    If Cells(input_loop_counter, 1) <> ticker Then
+      
+      
+      If ticker <> "" Then
+        
+       change_val = closing_val - opening_val
+        If opening_val <> 0 Then
+          change_percent_val = Round(change_val / opening_val * 100, 2)
+        Else
+          change_percent_val = 0
+        End If
+       
+       
+       Cells(output_row_counter, 9) = ticker
+       Cells(output_row_counter, 10) = change_val
+       Cells(output_row_counter, 11) = change_percent_val
+       Cells(output_row_counter, 12) = volume_val
+       
+              
+        If change_percent_val < 0 Then
+           
+           Range(Cells(output_row_counter, 10), Cells(output_row_counter, 10)).Interior.ColorIndex = 3
+        End If
+        
+        If change_percent_val > 0 Then
+           
+           Range(Cells(output_row_counter, 10), Cells(output_row_counter, 10)).Interior.ColorIndex = 4
+        End If
+       
+       
+       output_row_counter = output_row_counter + 1
+       
+       
+       If volume_val > max_vol_value Then
+         max_vol_value = volume_val
+         max_vol_ticker = ticker
+       End If
+       
+       If change_percent_val >= 0 Then
+        If change_percent_val > max_pos_percent_value Then
+          max_pos_percent_value = change_percent_val
+          max_pos_percent_ticker = ticker
+        End If
+       Else
+        If change_percent_val < max_neg_percent_value Then
+          max_neg_percent_value = change_percent_val
+          max_neg_percent_ticker = ticker
+        End If
+       End If
+       
+       
+      End If
+      
+      
+      ticker = Cells(input_loop_counter, 1)
+      opening_val = Cells(input_loop_counter, 3)
+      closing_val = Cells(input_loop_counter, 6)
+      volume_val = Cells(input_loop_counter, 7)
+      change_val = 0
+      change_percent_val = 0
+      
+      
+    Else
+   
+      If opening_val = 0 Then
+        opening_val = Cells(input_loop_counter, 3)
+      End If
+      closing_val = Cells(input_loop_counter, 6)
+      volume_val = volume_val + Cells(input_loop_counter, 7)
+    End If
+    
+ Next input_loop_counter
+ 
+ 
+  Cells(2, 15) = "Greatest % Increase"
+  Cells(3, 15) = "Greatest % Decrease"
+  Cells(4, 15) = "Greatest Volume"
+  Cells(1, 16) = "Ticker"
+  Cells(1, 17) = "Value"
+  
+  Cells(2, 16) = max_pos_percent_ticker
+  Cells(2, 17) = max_pos_percent_value
+  Cells(3, 16) = max_neg_percent_ticker
+  Cells(3, 17) = max_neg_percent_value
+  Cells(4, 16) = max_vol_ticker
+  Cells(4, 17) = max_vol_value
+  
+End Sub
+Sub process_all_sheets()
+  Dim ws As Worksheet
+  
+  For Each ws In Application.Sheets
+     ws.Activate
+     process_tickers
+     
+  Next ws
+  
+  Set ws = Nothing
+  
+End Sub
